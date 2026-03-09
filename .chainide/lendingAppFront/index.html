@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Timed Lending DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.min.js"></script>
+</head>
+
+<body>
+
+    <h1>Timed Lending</h1>
+
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <p id="wallet"></p>
+
+    <hr>
+
+    <h2>Create Loan</h2>
+
+    Interest Rate (%)<br>
+    <input id="interest" type="number"><br>
+
+Duration (seconds)<br>
+    <input id="duration" type="number"><br>
+
+Penalty per second (wei)<br>
+    <input id="penalty" type="number"><br>
+
+Principal (ETH)<br>
+    <input id="principal" type="number"><br>
+
+    <button onclick="createLoan()">Create Loan</button>
+
+    <hr>
+
+    <h2>Take Loan</h2>
+
+    Loan ID<br>
+    <input id="takeLoanId" type="number"><br>
+
+    <button onclick="takeLoan()">Take Loan</button>
+
+    <hr>
+
+    <h2>Check Repayment</h2>
+
+    Loan ID<br>
+    <input id="repayCheckId" type="number"><br>
+
+    <button onclick="checkRepayment()">Check Amount</button>
+
+    <p id="repaymentAmount"></p>
+
+    <hr>
+
+    <h2>Repay Loan</h2>
+
+    Loan ID<br>
+    <input id="repayLoanId" type="number"><br>
+
+Amount (ETH)<br>
+    <input id="repayAmount" type="number"><br>
+
+    <button onclick="repayLoan()">Repay Loan</button>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
