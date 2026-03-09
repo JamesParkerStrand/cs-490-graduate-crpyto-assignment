@@ -87,4 +87,7 @@ contract LendingStorage {
     }
 
     LendingPool public pool;
+
+
+    function createPublicLoanForUse()
 }
