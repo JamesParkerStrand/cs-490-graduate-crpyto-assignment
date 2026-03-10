@@ -72,6 +72,8 @@ contract TimedLending {
 
         Loan storage loan = loans[loanId];
 
+        require(loan.taken, "Loan not taken yet");
+
         uint256 interest = (loan.principal * loan.interestRate) / 100;
         uint256 total = loan.principal + interest;
 
@@ -88,6 +90,8 @@ contract TimedLending {
     function repayLoan(uint256 loanId) external payable {
 
         Loan storage loan = loans[loanId];
+
+        require(loan.taken, "Loan not taken yet");
 
         require(msg.sender == loan.borrower, "Not borrower");
         require(!loan.repaid, "Already repaid");

@@ -2,92 +2,148 @@ let provider;
 let signer;
 let contract;
 
-const contractAddress = "YOUR_CONTRACT_ADDRESS";
+const contractAddress = "0x17F827e99542eE2b81a273F6A119E5232D6C56b9";
 
 const abi = [
-    "function createLoan(uint256 interestRate,uint256 duration,uint256 penaltyPerSecond) payable returns(uint256)",
+    "function createLoan(uint256 interestRate,uint256 duration,uint256 penaltyPerSecond) payable returns (uint256)",
     "function takeLoan(uint256 loanId)",
     "function repayLoan(uint256 loanId) payable",
-    "function getRepaymentAmount(uint256 loanId) view returns(uint256)"
+    "function getRepaymentAmount(uint256 loanId) view returns (uint256)",
+    "function nextLoanId() view returns (uint256)"
 ];
 
 async function connectWallet() {
+    try {
+        if (!window.ethereum) {
+            throw new Error("MetaMask not detected");
+        }
 
-    if (!window.ethereum) {
-        alert("Install MetaMask");
-        return;
+        if (!ethers.isAddress(contractAddress)) {
+            throw new Error("Invalid contract address. Paste your deployed contract address in app.js.");
+        }
+
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+
+        signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        const network = await provider.getNetwork();
+
+        contract = new ethers.Contract(contractAddress, abi, signer);
+
+        document.getElementById("wallet").innerText =
+            `Connected: ${address}\nChain ID: ${network.chainId.toString()}`;
+
+        setStatus("Wallet connected successfully.");
+    } catch (err) {
+        showError(err);
     }
-
-    provider = new ethers.BrowserProvider(window.ethereum);
-
-    await provider.send("eth_requestAccounts", []);
-
-    signer = await provider.getSigner();
-
-    contract = new ethers.Contract(contractAddress, abi, signer);
-
-    const address = await signer.getAddress();
-
-    document.getElementById("wallet").innerText = "Connected: " + address;
 }
 
 async function createLoan() {
+    try {
+        ensureConnected();
 
-    const interest = document.getElementById("interest").value;
-    const duration = document.getElementById("duration").value;
-    const penalty = document.getElementById("penalty").value;
-    const principal = document.getElementById("principal").value;
+        const interest = document.getElementById("interest").value.trim();
+        const duration = document.getElementById("duration").value.trim();
+        const penalty = document.getElementById("penalty").value.trim();
+        const principal = document.getElementById("principal").value.trim();
 
-    const tx = await contract.createLoan(
-        interest,
-        duration,
-        penalty,
-        {
-            value: ethers.parseEther(principal)
+        if (!interest || !duration || !penalty || !principal) {
+            throw new Error("Please fill all fields.");
         }
-    );
 
-    await tx.wait();
+        const tx = await contract.createLoan(
+            BigInt(interest),
+            BigInt(duration),
+            BigInt(penalty),
+            {
+                value: ethers.parseEther(principal)
+            }
+        );
 
-    alert("Loan Created!");
+        setStatus("Creating loan...");
+        await tx.wait();
+
+        const nextId = await contract.nextLoanId();
+        const createdId = Number(nextId) - 1;
+
+        setStatus(`Loan created successfully. Loan ID: ${createdId}`);
+    } catch (err) {
+        showError(err);
+    }
 }
 
 async function takeLoan() {
+    try {
+        ensureConnected();
 
-    const loanId = document.getElementById("takeLoanId").value;
+        const loanId = document.getElementById("takeLoanId").value.trim();
+        if (!loanId) throw new Error("Enter loan ID.");
 
-    const tx = await contract.takeLoan(loanId);
+        const tx = await contract.takeLoan(BigInt(loanId));
+        setStatus("Taking loan...");
+        await tx.wait();
 
-    await tx.wait();
-
-    alert("Loan Taken!");
+        setStatus(`Loan ${loanId} taken successfully.`);
+    } catch (err) {
+        showError(err);
+    }
 }
 
 async function checkRepayment() {
+    try {
+        ensureConnected();
 
-    const loanId = document.getElementById("repayCheckId").value;
+        const loanId = document.getElementById("repayCheckId").value.trim();
+        if (!loanId) throw new Error("Enter loan ID.");
 
-    const amount = await contract.getRepaymentAmount(loanId);
+        const amount = await contract.getRepaymentAmount(BigInt(loanId));
+        document.getElementById("repaymentAmount").innerText =
+            `Repayment Amount: ${ethers.formatEther(amount)} ETH`;
 
-    const eth = ethers.formatEther(amount);
-
-    document.getElementById("repaymentAmount").innerText =
-        "Repayment Amount: " + eth + " ETH";
+        setStatus("Repayment amount loaded.");
+    } catch (err) {
+        showError(err);
+    }
 }
 
 async function repayLoan() {
+    try {
+        ensureConnected();
 
-    const loanId = document.getElementById("repayLoanId").value;
-    const amount = document.getElementById("repayAmount").value;
+        const loanId = document.getElementById("repayLoanId").value.trim();
+        const amount = document.getElementById("repayAmount").value.trim();
 
-    const tx = await contract.repayLoan(
-        loanId,
-        {
-            value: ethers.parseEther(amount)
+        if (!loanId || !amount) {
+            throw new Error("Enter loan ID and repayment amount.");
         }
-    );
 
-    await tx.wait();
+        const tx = await contract.repayLoan(BigInt(loanId), {
+            value: ethers.parseEther(amount)
+        });
 
-    alert("Loan Repaid!");
+        setStatus("Repaying loan...");
+        await tx.wait();
+
+        setStatus(`Loan ${loanId} repaid successfully.`);
+    } catch (err) {
+        showError(err);
+    }
+}
+
+function ensureConnected() {
+    if (!contract) {
+        throw new Error("Connect wallet first.");
+    }
+}
+
+function setStatus(message) {
+    document.getElementById("status").innerText = message;
+}
+
+function showError(err) {
+    console.error(err);
+    document.getElementById("status").innerText =
+        "Error: " + (err.reason || err.shortMessage || err.message || "Unknown error");
 }

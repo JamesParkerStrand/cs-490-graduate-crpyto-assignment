@@ -1,9 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Timed Lending DApp</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        input,
+        button {
+            margin: 6px 0 12px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        hr {
+            margin: 24px 0;
+        }
+
+        #wallet,
+        #status,
+        #repaymentAmount {
+            padding: 10px;
+            background: #f5f5f5;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 
 <body>
@@ -11,23 +45,24 @@
     <h1>Timed Lending</h1>
 
     <button onclick="connectWallet()">Connect Wallet</button>
-    <p id="wallet"></p>
+    <p id="wallet">Not connected</p>
+    <p id="status">Ready</p>
 
     <hr>
 
     <h2>Create Loan</h2>
 
-    Interest Rate (%)<br>
-    <input id="interest" type="number"><br>
+    <label>Interest Rate (%)</label>
+    <input id="interest" type="number" />
 
-Duration (seconds)<br>
-    <input id="duration" type="number"><br>
+    <label>Duration (seconds)</label>
+    <input id="duration" type="number" />
 
-Penalty per second (wei)<br>
-    <input id="penalty" type="number"><br>
+    <label>Penalty per second (wei)</label>
+    <input id="penalty" type="number" />
 
-Principal (ETH)<br>
-    <input id="principal" type="number"><br>
+    <label>Principal (ETH)</label>
+    <input id="principal" type="text" placeholder="Example: 0.1" />
 
     <button onclick="createLoan()">Create Loan</button>
 
@@ -35,8 +70,8 @@ Principal (ETH)<br>
 
     <h2>Take Loan</h2>
 
-    Loan ID<br>
-    <input id="takeLoanId" type="number"><br>
+    <label>Loan ID</label>
+    <input id="takeLoanId" type="number" />
 
     <button onclick="takeLoan()">Take Loan</button>
 
@@ -44,8 +79,8 @@ Principal (ETH)<br>
 
     <h2>Check Repayment</h2>
 
-    Loan ID<br>
-    <input id="repayCheckId" type="number"><br>
+    <label>Loan ID</label>
+    <input id="repayCheckId" type="number" />
 
     <button onclick="checkRepayment()">Check Amount</button>
 
@@ -55,16 +90,15 @@ Principal (ETH)<br>
 
     <h2>Repay Loan</h2>
 
-    Loan ID<br>
-    <input id="repayLoanId" type="number"><br>
+    <label>Loan ID</label>
+    <input id="repayLoanId" type="number" />
 
-Amount (ETH)<br>
-    <input id="repayAmount" type="number"><br>
+    <label>Amount (ETH)</label>
+    <input id="repayAmount" type="text" placeholder="Example: 0.11" />
 
     <button onclick="repayLoan()">Repay Loan</button>
 
     <script src="app.js"></script>
-
 </body>
 
 </html>
